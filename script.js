@@ -187,8 +187,8 @@ if (reserveForm) {
 
     const fd = new FormData(reserveForm);
     fd.append('access_key', RESERVE_ACCESS_KEY);
-    fd.append('subject', '[도전과성취] 새 상담예약 접수');
-    fd.append('from_name', '도전과성취 홈페이지');
+    fd.append('subject', '[도성학원] 새 상담예약 접수');
+    fd.append('from_name', '도성학원 홈페이지');
 
     const label = submitBtn.textContent;
     submitBtn.disabled = true;

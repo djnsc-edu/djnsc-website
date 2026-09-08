@@ -109,19 +109,19 @@ em { font-style: normal; }
   z-index: 100;
   background: rgba(10, 23, 48, 0);
   transition: background 0.4s var(--ease), backdrop-filter 0.4s, box-shadow 0.4s, padding 0.4s;
-  padding: clamp(14px, 2.4vw, 22px) 0;
+  padding: clamp(22px, 3.2vw, 32px) 0;
 }
 .site-header.scrolled {
   background: rgba(10, 23, 48, 0.92);
   backdrop-filter: blur(14px);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
-  padding: 14px 0;
+  padding: 26px 0;
 }
 .header-inner { display: flex; align-items: center; justify-content: space-between; }
 
 .brand { display: flex; flex-direction: row; align-items: center; gap: 12px; line-height: 1.1; }
 .brand-text { display: flex; flex-direction: column; }
-.brand-mark { width: clamp(34px, 4.6vw, 42px); height: clamp(34px, 4.6vw, 42px); object-fit: contain; flex-shrink: 0; }
+.brand-mark { width: clamp(44px, 5.4vw, 58px); height: auto; object-fit: contain; flex-shrink: 0; }
 .brand-kr { font-size: clamp(18px, 2.6vw, 22px); font-weight: 800; color: var(--ivory); letter-spacing: -0.01em; }
 .brand-en { font-size: 16px; letter-spacing: 0.34em; color: var(--gold); font-weight: 600; margin-top: 6px; }
 .site-header .brand-en { font-size: clamp(9px, 1.6vw, 11px); letter-spacing: 0.24em; margin-top: 5px; }
@@ -336,7 +336,6 @@ em { font-style: normal; }
   border-radius: var(--radius); padding: clamp(20px, 2.6vw, 26px);
   transition: border-color 0.35s, transform 0.35s var(--ease), box-shadow 0.35s;
 }
-.director-card:hover { border-color: var(--gold); transform: translateY(-5px); box-shadow: 0 26px 54px rgba(0,0,0,0.34); }
 .director-photo {
   flex-shrink: 0; width: clamp(180px, 22vw, 240px); align-self: stretch; border-radius: 12px;
   overflow: hidden; border: 1px solid var(--line-light);
@@ -570,6 +569,8 @@ em { font-style: normal; }
 .footer-col p + p { margin-top: 8px; }
 .footer-col a { transition: color 0.25s; }
 .footer-col a:hover { color: var(--gold-soft); }
+.footer-reserve { color: var(--gold); font-weight: 700; }
+.footer-reserve:hover { color: var(--gold-soft); }
 .footer-bottom { margin-top: 48px; }
 .footer-copy { font-size: 16px; color: var(--ivory); padding-top: 26px; border-top: 1px solid var(--line-light); }
 
@@ -720,7 +721,7 @@ em { font-style: normal; }
   width: 100%; height: clamp(280px, 44vw, 520px); object-fit: cover; display: block;
 }
 
-.footer-mark { width: 46px; height: 46px; object-fit: contain; display: block; margin-bottom: 16px; }
+.footer-mark { width: clamp(60px, 7vw, 72px); height: auto; object-fit: contain; display: block; margin-bottom: 16px; }
 
 /* Lucide icons */
 .card-icon { display: block; width: 30px; height: 30px; color: var(--gold); margin-bottom: 16px; }
