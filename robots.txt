@@ -9,4 +9,4 @@ Allow: /
 User-agent: Daumoa
 Allow: /
 
-Sitemap: https://djnsc-edu.github.io/sitemap.xml
+Sitemap: https://djnsc.com/sitemap.xml
