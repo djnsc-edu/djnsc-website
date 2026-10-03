@@ -7,7 +7,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: asia-northeast3            # 서울 리전
+  REGION: asia-northeast1            # 도쿄 리전 (Cloud Run 도메인 매핑 지원 리전; Artifact Registry는 서울)
   SERVICE: djnsc-website
   REPO: djnsc-website                # Artifact Registry 저장소 이름
 
@@ -36,11 +36,11 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
       - name: Build and push image
         run: |
-          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:${GITHUB_SHA}"
+          IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:${GITHUB_SHA}"
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"

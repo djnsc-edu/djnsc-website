@@ -1,6 +1,7 @@
 # 도성학원 공식 웹사이트 배포 가이드 (Google Cloud Run)
 
-정적 사이트(HTML/CSS/JS)를 nginx 컨테이너로 묶어 **Google Cloud Run(서울 리전)** 에 배포합니다.
+정적 사이트(HTML/CSS/JS)를 nginx 컨테이너로 묶어 **Google Cloud Run(도쿄 리전 asia-northeast1)** 에 배포합니다.
+이미지는 서울 리전(asia-northeast3) Artifact Registry에 저장합니다. 서비스를 도쿄에 두는 이유: Cloud Run 도메인 매핑이 서울 리전을 지원하지 않음 (AFT 사이트와 동일 구성).
 `main` 브랜치에 push 하면 GitHub Actions가 자동으로 빌드·배포합니다.
 
 - 저장소: `djnsc-edu/djnsc-website`
@@ -16,7 +17,8 @@
 
 ```bash
 export PROJECT_ID=your-gcp-project-id
-export REGION=asia-northeast3
+export REGION=asia-northeast1   # 서비스 리전(도쿄)
+export AR_REGION=asia-northeast3 # 이미지 저장소 리전(서울)
 gcloud config set project $PROJECT_ID
 
 # 필요한 API 활성화
@@ -25,7 +27,7 @@ gcloud services enable run.googleapis.com artifactregistry.googleapis.com \
 
 # 컨테이너 이미지 저장소
 gcloud artifacts repositories create djnsc-website \
-  --repository-format=docker --location=$REGION
+  --repository-format=docker --location=$AR_REGION
 ```
 
 ## 2. GitHub Actions용 서비스 계정 + Workload Identity Federation
@@ -78,7 +80,7 @@ echo "GCP_WIF_PROVIDER= projects/$PROJECT_NUMBER/locations/global/workloadIdenti
 ## 4. 커스텀 도메인 `djnsc.com` 연결
 
 ```bash
-# 도메인 소유 확인(Search Console)이 끝난 뒤
+# 도메인 소유 확인(Search Console → 도메인 속성 → 가비아에 TXT 레코드)이 끝난 뒤
 gcloud beta run domain-mappings create --service=djnsc-website --domain=djnsc.com --region=$REGION
 gcloud beta run domain-mappings create --service=djnsc-website --domain=www.djnsc.com --region=$REGION
 ```
