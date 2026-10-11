@@ -96,7 +96,16 @@ SSL 인증서는 Cloud Run이 자동 발급·갱신합니다(DNS 반영 후 보�
 docker build -t djnsc-website .
 docker run --rm -p 8080:8080 djnsc-website
 # → http://localhost:8080
+# → http://localhost:8080/api/blog  (네이버 블로그 RSS 프록시 — <item>이 보이면 정상)
 ```
+
+## 네이버 블로그 연동 (메인 페이지 "학원소식" 섹션)
+
+- 메인 페이지의 학원소식 카드는 네이버 블로그 RSS(`https://rss.blog.naver.com/djnsc.xml`)를 읽어 그립니다.
+- 네이버가 CORS 헤더를 주지 않으므로 nginx가 `/api/blog` 경로에서 RSS를 중계하며, 응답을 10분 캐시합니다 (`nginx.conf`).
+- 블로그에 글을 올리면 최대 10분 안에 사이트에 반영됩니다. 별도 배포는 필요 없습니다.
+- 노출 개수는 `script.js`의 `MAX_POSTS`(기본 6개)로 조정합니다. RSS가 내보내는 글 수는 네이버 블로그 관리 → 기본 설정 → RSS 설정에서 늘릴 수 있습니다.
+- RSS를 못 가져오면 카드 대신 "네이버 블로그에서 보기" 안내가 표시됩니다.
 
 ## 6. 수동 배포 (GitHub Actions 없이)
 

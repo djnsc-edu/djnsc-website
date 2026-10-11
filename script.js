@@ -272,3 +272,146 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     },
   });
 }
+
+// ===== Naver blog feed (RSS via /api/blog nginx proxy) =====
+(() => {
+  const grid = document.getElementById('blogGrid');
+  if (!grid) return;
+
+  const BLOG_HOME = 'https://blog.naver.com/djnsc';
+  const MAX_POSTS = 6;
+
+  const text = (node, sel) => {
+    const el = node.querySelector(sel);
+    return el ? el.textContent.trim() : '';
+  };
+
+  const formatDate = (raw) => {
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return '';
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
+  };
+
+  // description은 HTML 문자열(요약 + <img>) → 썸네일과 순수 텍스트로 분리
+  const parseDescription = (html) => {
+    const doc = new DOMParser().parseFromString(html || '', 'text/html');
+    const img = doc.querySelector('img');
+    const thumb = img ? img.getAttribute('src') || '' : '';
+    doc.querySelectorAll('img').forEach((el) => el.remove());
+    const excerpt = (doc.body.textContent || '').replace(/\s+/g, ' ').replace(/[.…]{3,}\s*$/, '…').trim();
+    return { thumb: /^https:\/\//.test(thumb) ? thumb : '', excerpt };
+  };
+
+  const cleanLink = (link, guid) => {
+    const candidate = /^https:\/\/blog\.naver\.com\//.test(guid) ? guid : link;
+    try {
+      const u = new URL(candidate);
+      if (u.hostname !== 'blog.naver.com') return BLOG_HOME;
+      u.search = '';
+      return u.toString();
+    } catch {
+      return BLOG_HOME;
+    }
+  };
+
+  const el = (tag, cls, content) => {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (content != null) node.textContent = content;
+    return node;
+  };
+
+  const renderCard = (post, i) => {
+    const card = el('article', 'blog-card is-visible');
+    card.style.animationDelay = `${i * 80}ms`;
+
+    const link = el('a', 'blog-link');
+    link.href = post.link;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.setAttribute('aria-label', `${post.title} (새 창에서 네이버 블로그 열기)`);
+
+    const thumb = el('div', 'blog-thumb');
+    const showPlaceholder = () => {
+      thumb.classList.add('blog-thumb-empty');
+      thumb.replaceChildren(el('span', null, 'DJNSC'));
+    };
+    if (post.thumb) {
+      const img = document.createElement('img');
+      img.src = post.thumb;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      // 네이버 이미지 서버는 외부 Referer를 차단하므로 referrer를 보내지 않음
+      img.referrerPolicy = 'no-referrer';
+      img.addEventListener('error', showPlaceholder, { once: true });
+      thumb.appendChild(img);
+    } else {
+      showPlaceholder();
+    }
+
+    const body = el('div', 'blog-body');
+    const meta = el('div', 'blog-meta');
+    if (post.category) meta.appendChild(el('span', 'blog-category', post.category));
+    if (post.date) {
+      const time = el('time', null, post.date);
+      time.dateTime = post.iso;
+      meta.appendChild(time);
+    }
+    body.append(meta, el('h3', 'blog-title', post.title));
+    if (post.excerpt) body.appendChild(el('p', 'blog-excerpt', post.excerpt));
+    body.appendChild(el('span', 'blog-more', '자세히 보기 →'));
+
+    link.append(thumb, body);
+    card.appendChild(link);
+    return card;
+  };
+
+  const renderFallback = (message) => {
+    const box = el('div', 'blog-fallback');
+    box.appendChild(el('p', null, message));
+    const a = el('a', null, '네이버 블로그에서 보기 →');
+    a.href = BLOG_HOME;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    box.appendChild(a);
+    grid.replaceChildren(box);
+  };
+
+  fetch('/api/blog', { headers: { Accept: 'application/rss+xml, text/xml' } })
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
+    .then((xml) => {
+      const doc = new DOMParser().parseFromString(xml, 'text/xml');
+      if (doc.querySelector('parsererror')) throw new Error('invalid RSS');
+      const posts = Array.from(doc.querySelectorAll('item'))
+        .slice(0, MAX_POSTS)
+        .map((item) => {
+          const pub = text(item, 'pubDate');
+          const d = new Date(pub);
+          return {
+            title: text(item, 'title'),
+            link: cleanLink(text(item, 'link'), text(item, 'guid')),
+            category: text(item, 'category'),
+            date: formatDate(pub),
+            iso: Number.isNaN(d.getTime()) ? '' : d.toISOString(),
+            ...parseDescription(text(item, 'description')),
+          };
+        })
+        .filter((p) => p.title);
+
+      if (!posts.length) {
+        renderFallback('아직 등록된 소식이 없습니다.');
+        return;
+      }
+      grid.replaceChildren(...posts.map(renderCard));
+    })
+    .catch((err) => {
+      console.warn('[blog] 네이버 블로그 글을 불러오지 못했습니다:', err);
+      renderFallback('블로그 소식을 잠시 불러올 수 없습니다.');
+    })
+    .finally(() => grid.setAttribute('aria-busy', 'false'));
+})();
