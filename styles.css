@@ -567,13 +567,10 @@ em { font-style: normal; }
 .blog-sub { padding: clamp(64px, 9vw, 100px) 0; background: var(--ivory); }
 .blog-sub .section-head { margin-bottom: clamp(32px, 5vw, 48px); }
 .blog-head .section-title { word-break: keep-all; }
-/* .swiper 기본 CSS(padding:0)보다 우선하도록 복합 선택자 사용 */
-.blog-slider.swiper { overflow: hidden; padding-bottom: 46px; }
-.blog-slider .swiper-wrapper { align-items: stretch; }
+/* .swiper 기본 CSS(padding:0)보다 우선하도록 복합 선택자 사용. 상하 여백은 카드 호버 이동·그림자 공간 */
+.blog-slider.swiper { overflow: hidden; padding: 8px 0 24px; }
+.blog-slider .swiper-wrapper { align-items: stretch; transition-timing-function: linear !important; }
 .blog-slider .swiper-slide { height: auto; }
-.blog-slider .swiper-pagination { bottom: 6px; }
-.blog-slider .swiper-pagination-bullet { background: var(--red); opacity: 0.3; width: 9px; height: 9px; transition: opacity 0.3s, background 0.3s; }
-.blog-slider .swiper-pagination-bullet-active { background: var(--red); opacity: 1; }
 .blog-card {
   display: flex; flex-direction: column; margin: 0;
   background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);

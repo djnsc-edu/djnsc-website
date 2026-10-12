@@ -381,17 +381,17 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     slider.replaceChildren(box);
   };
 
-  // 한 줄 가로 배치 + 자동 슬라이드 (Swiper). 글이 한 화면에 다 들어가면 멈춰 있음
-  const initSlider = (count) => {
+  // 한 줄 가로 배치, 멈추지 않고 계속 흘러가는 자동 슬라이드 (Swiper 루프 + 선형 속도)
+  const initSlider = () => {
     if (!window.Swiper) return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     new Swiper(slider, {
       slidesPerView: 1.15,
       spaceBetween: 16,
+      loop: true,
+      speed: 6000,                 // 한 카드 폭을 지나는 데 걸리는 시간(ms) — 클수록 느림
       grabCursor: true,
-      loop: count > 3,
-      autoplay: reduceMotion ? false : { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true },
-      pagination: { el: slider.querySelector('.blog-pagination'), clickable: true },
+      autoplay: reduceMotion ? false : { delay: 0, disableOnInteraction: false, pauseOnMouseEnter: false },
       breakpoints: {
         640: { slidesPerView: 2, spaceBetween: 20 },
         1024: { slidesPerView: 3, spaceBetween: 24 },
@@ -427,8 +427,11 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
         renderFallback('아직 등록된 소식이 없습니다.');
         return;
       }
-      grid.replaceChildren(...posts.map(renderCard));
-      initSlider(posts.length);
+      // 루프가 끊기지 않도록 글이 적으면 같은 글을 반복해 최소 8장 확보
+      const slides = [];
+      while (slides.length < Math.max(8, posts.length)) slides.push(...posts);
+      grid.replaceChildren(...slides.map(renderCard));
+      initSlider();
     })
     .catch((err) => {
       console.warn('[blog] 네이버 블로그 글을 불러오지 못했습니다:', err);
