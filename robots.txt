@@ -1,11 +1,11 @@
 User-agent: *
 Allow: /
 
-# 네이버 검색로봇
+# Naver
 User-agent: Yeti
 Allow: /
 
-# 다음(카카오) 검색로봇
+# Daum (Kakao)
 User-agent: Daumoa
 Allow: /
 
