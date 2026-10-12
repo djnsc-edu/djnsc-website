@@ -41,7 +41,7 @@ jobs:
       - name: Build and push image
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:${GITHUB_SHA}"
-          docker build -t "$IMAGE" .
+          docker build --build-arg ASSET_VERSION="${GITHUB_SHA::8}" -t "$IMAGE" .
           docker push "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 

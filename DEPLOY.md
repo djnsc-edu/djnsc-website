@@ -104,6 +104,7 @@ docker run --rm -p 8080:8080 djnsc-website
 - 메인 페이지의 학원소식 카드는 네이버 블로그 RSS(`https://rss.blog.naver.com/djnsc.xml`)를 읽어 그립니다.
 - 네이버가 CORS 헤더를 주지 않으므로 nginx가 `/api/blog` 경로에서 RSS를 중계하며, 응답을 10분 캐시합니다 (`nginx.conf`).
 - 블로그에 글을 올리면 최대 10분 안에 사이트에 반영됩니다. 별도 배포는 필요 없습니다.
+- CSS/JS는 브라우저에 1일 캐시되므로 Dockerfile이 빌드 시 `styles.css?v=…`, `script.js?v=…` 로 버전을 붙여 배포 직후 새 파일을 받게 합니다.
 - 노출 개수는 `script.js`의 `MAX_POSTS`(기본 6개)로 조정합니다. RSS가 내보내는 글 수는 네이버 블로그 관리 → 기본 설정 → RSS 설정에서 늘릴 수 있습니다.
 - RSS를 못 가져오면 카드 대신 "네이버 블로그에서 보기" 안내가 표시됩니다.
 
