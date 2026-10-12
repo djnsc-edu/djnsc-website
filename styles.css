@@ -567,7 +567,13 @@ em { font-style: normal; }
 .blog-sub { padding: clamp(64px, 9vw, 100px) 0; background: var(--ivory); }
 .blog-sub .section-head { margin-bottom: clamp(32px, 5vw, 48px); }
 .blog-head .section-title { word-break: keep-all; }
-.blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 28px); }
+/* .swiper 기본 CSS(padding:0)보다 우선하도록 복합 선택자 사용 */
+.blog-slider.swiper { overflow: hidden; padding-bottom: 46px; }
+.blog-slider .swiper-wrapper { align-items: stretch; }
+.blog-slider .swiper-slide { height: auto; }
+.blog-slider .swiper-pagination { bottom: 6px; }
+.blog-slider .swiper-pagination-bullet { background: var(--red); opacity: 0.3; width: 9px; height: 9px; transition: opacity 0.3s, background 0.3s; }
+.blog-slider .swiper-pagination-bullet-active { background: var(--red); opacity: 1; }
 .blog-card {
   display: flex; flex-direction: column; margin: 0;
   background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
@@ -605,19 +611,17 @@ em { font-style: normal; }
 
 /* 불러오기 실패 */
 .blog-fallback {
-  grid-column: 1 / -1; text-align: center; padding: clamp(32px, 5vw, 56px) var(--pad);
+  text-align: center; padding: clamp(32px, 5vw, 56px) var(--pad);
   border: 1px dashed var(--line); border-radius: var(--radius); color: var(--ink-soft); font-size: 15px; line-height: 1.8;
 }
 .blog-fallback a { color: var(--red); font-weight: 700; border-bottom: 2px solid var(--gold); }
 
-.blog-card.is-visible { animation: blog-in 0.6s var(--ease) both; }
+.blog-card.is-visible .blog-link { animation: blog-in 0.6s var(--ease) both; }
 @keyframes blog-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .blog-card.is-visible { animation: none; }
+  .blog-card.is-visible .blog-link { animation: none; }
   .blog-skeleton .blog-thumb, .blog-line { animation: none; }
 }
-@media (max-width: 960px) { .blog-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .blog-grid { grid-template-columns: 1fr; } }
 
 /* ===================== FOOTER ===================== */
 .site-footer { background: var(--wine-950); color: var(--ivory); padding: clamp(48px, 6vw, 64px) 0 clamp(44px, 5.5vw, 56px); }

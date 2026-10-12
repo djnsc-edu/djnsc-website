@@ -275,11 +275,12 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
 
 // ===== Naver blog feed (RSS via /api/blog nginx proxy) =====
 (() => {
-  const grid = document.getElementById('blogGrid');
-  if (!grid) return;
+  const slider = document.getElementById('blogSlider');
+  const grid = slider ? slider.querySelector('.swiper-wrapper') : null;
+  if (!slider || !grid) return;
 
   const BLOG_HOME = 'https://blog.naver.com/djnsc';
-  const MAX_POSTS = 6;
+  const MAX_POSTS = 12;
 
   const text = (node, sel) => {
     const el = node.querySelector(sel);
@@ -323,10 +324,10 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
   };
 
   const renderCard = (post, i) => {
-    const card = el('article', 'blog-card is-visible');
-    card.style.animationDelay = `${i * 80}ms`;
+    const card = el('article', 'swiper-slide blog-card is-visible');
 
     const link = el('a', 'blog-link');
+    link.style.animationDelay = `${i * 80}ms`;
     link.href = post.link;
     link.target = '_blank';
     link.rel = 'noopener';
@@ -376,7 +377,26 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     a.target = '_blank';
     a.rel = 'noopener';
     box.appendChild(a);
-    grid.replaceChildren(box);
+    slider.classList.remove('swiper');
+    slider.replaceChildren(box);
+  };
+
+  // 한 줄 가로 배치 + 자동 슬라이드 (Swiper). 글이 한 화면에 다 들어가면 멈춰 있음
+  const initSlider = (count) => {
+    if (!window.Swiper) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    new Swiper(slider, {
+      slidesPerView: 1.15,
+      spaceBetween: 16,
+      grabCursor: true,
+      loop: count > 3,
+      autoplay: reduceMotion ? false : { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true },
+      pagination: { el: slider.querySelector('.blog-pagination'), clickable: true },
+      breakpoints: {
+        640: { slidesPerView: 2, spaceBetween: 20 },
+        1024: { slidesPerView: 3, spaceBetween: 24 },
+      },
+    });
   };
 
   fetch('/api/blog', { headers: { Accept: 'application/rss+xml, text/xml' } })
@@ -408,10 +428,11 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
         return;
       }
       grid.replaceChildren(...posts.map(renderCard));
+      initSlider(posts.length);
     })
     .catch((err) => {
       console.warn('[blog] 네이버 블로그 글을 불러오지 못했습니다:', err);
       renderFallback('블로그 소식을 잠시 불러올 수 없습니다.');
     })
-    .finally(() => grid.setAttribute('aria-busy', 'false'));
+    .finally(() => slider.setAttribute('aria-busy', 'false'));
 })();
