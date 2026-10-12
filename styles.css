@@ -559,6 +559,9 @@ em { font-style: normal; }
 
 /* ===================== BLOG (네이버 블로그 RSS) ===================== */
 .blog { background: var(--paper); }
+/* 서브 페이지(수학관 등): 메인의 .section(100vh)과 달리 상세 섹션 리듬에 맞춘 패딩 */
+.blog-sub { padding: clamp(64px, 9vw, 100px) 0; background: var(--ivory); }
+.blog-sub .section-head { margin-bottom: clamp(32px, 5vw, 48px); }
 .blog-head .section-title { word-break: keep-all; }
 .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 28px); }
 .blog-card {
