@@ -569,7 +569,7 @@ em { font-style: normal; }
 .blog-head .section-title { word-break: keep-all; }
 /* .swiper 기본 CSS(padding:0)보다 우선하도록 복합 선택자 사용. 상하 여백은 카드 호버 이동·그림자 공간 */
 .blog-slider.swiper { overflow: hidden; padding: 8px 0 24px; }
-.blog-slider .swiper-wrapper { align-items: stretch; transition-timing-function: linear !important; }
+.blog-slider .swiper-wrapper { align-items: stretch; }
 .blog-slider .swiper-slide { height: auto; }
 .blog-card {
   display: flex; flex-direction: column; margin: 0;

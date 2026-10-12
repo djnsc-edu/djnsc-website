@@ -381,20 +381,21 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     slider.replaceChildren(box);
   };
 
-  // 한 줄 가로 배치, 멈추지 않고 계속 흘러가는 자동 슬라이드 (Swiper 루프 + 선형 속도)
+  // 한 줄 가로 배치, 화면에 보이는 장수(데스크톱 3장)씩 5초마다 부드럽게 넘어가는 자동 슬라이드
   const initSlider = () => {
     if (!window.Swiper) return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     new Swiper(slider, {
-      slidesPerView: 1.15,
+      slidesPerView: 1,
+      slidesPerGroup: 1,
       spaceBetween: 16,
       loop: true,
-      speed: 6000,                 // 한 카드 폭을 지나는 데 걸리는 시간(ms) — 클수록 느림
+      speed: 900,                  // 넘어가는 애니메이션 시간(ms)
       grabCursor: true,
-      autoplay: reduceMotion ? false : { delay: 0, disableOnInteraction: false, pauseOnMouseEnter: false },
+      autoplay: reduceMotion ? false : { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: false },
       breakpoints: {
-        640: { slidesPerView: 2, spaceBetween: 20 },
-        1024: { slidesPerView: 3, spaceBetween: 24 },
+        640: { slidesPerView: 2, slidesPerGroup: 2, spaceBetween: 20 },
+        1024: { slidesPerView: 3, slidesPerGroup: 3, spaceBetween: 24 },
       },
     });
   };
@@ -427,9 +428,9 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
         renderFallback('아직 등록된 소식이 없습니다.');
         return;
       }
-      // 루프가 끊기지 않도록 글이 적으면 같은 글을 반복해 최소 8장 확보
-      const slides = [];
-      while (slides.length < Math.max(8, posts.length)) slides.push(...posts);
+      // 3장/2장 묶음 루프가 끊기지 않도록 카드 수를 6의 배수(최소 12장)로 맞춰 같은 글을 반복 배치
+      const target = Math.ceil(Math.max(12, posts.length) / 6) * 6;
+      const slides = Array.from({ length: target }, (_, i) => posts[i % posts.length]);
       grid.replaceChildren(...slides.map(renderCard));
       initSlider();
     })
