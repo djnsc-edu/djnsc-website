@@ -634,8 +634,18 @@ em { font-style: normal; }
 .footer-col a:hover { color: var(--gold-soft); }
 .footer-reserve { color: var(--gold); font-weight: 700; }
 .footer-reserve:hover { color: var(--gold-soft); }
-.footer-bottom { margin-top: 48px; }
-.footer-copy { font-size: 16px; color: var(--ivory); padding-top: 26px; border-top: 1px solid var(--line-light); }
+.footer-bottom { margin-top: 48px; padding-top: 26px; border-top: 1px solid var(--line-light); }
+.footer-legal {
+  display: flex; flex-wrap: wrap; column-gap: 22px; row-gap: 6px; overflow: hidden; /* 줄바꿈 첫 항목의 구분선 숨김 */
+  font-size: 14px; line-height: 1.7; color: rgba(247, 244, 241, 0.78); word-break: keep-all;
+}
+.footer-legal span { position: relative; }
+.footer-legal span + span::before {
+  content: ""; position: absolute; left: -11px; top: 50%; width: 1px; height: 11px;
+  background: var(--line-light); transform: translateY(-50%);
+}
+.footer-legal a:hover { color: var(--gold-soft); }
+.footer-copy { margin-top: 12px; font-size: 15px; color: rgba(247, 244, 241, 0.7); }
 
 /* ===================== MOBILE FIXED CTA ===================== */
 .mobile-cta {
