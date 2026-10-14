@@ -1,3 +1,8 @@
+// ===== Analytics helper (GA4 gtag가 있을 때만 전송) =====
+const track = (name, params = {}) => {
+  if (typeof window.gtag === 'function') window.gtag('event', name, params);
+};
+
 // ===== Header scroll state =====
 const header = document.getElementById('siteHeader');
 const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
@@ -81,7 +86,11 @@ if (reserveModal) {
   };
 
   document.querySelectorAll('[data-reserve-open]').forEach((el) => {
-    el.addEventListener('click', (e) => { e.preventDefault(); openReserve(); });
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      track('reserve_open', { location: el.closest('section, header, footer')?.id || el.className || 'unknown' });
+      openReserve();
+    });
   });
   reserveModal.querySelectorAll('[data-reserve-close]').forEach((el) => {
     el.addEventListener('click', closeReserve);
@@ -198,6 +207,7 @@ if (reserveForm) {
       const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.success) {
+        track('generate_lead', { method: 'reserve_form', achievement: fd.get('achievement') || '' });
         reserveForm.reset();
         setNote('', '');
         if (window.closeReserve) window.closeReserve();
@@ -440,3 +450,17 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     })
     .finally(() => slider.setAttribute('aria-busy', 'false'));
 })();
+
+// ===== Analytics: 전화·블로그·외부 링크 클릭 추적 =====
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('tel:')) {
+    track('phone_click', { number: href.slice(4) });
+  } else if (a.classList.contains('blog-link')) {
+    track('blog_click', { title: (a.querySelector('.blog-title')?.textContent || '').slice(0, 100), url: a.href });
+  } else if (/^https?:/.test(href) && a.hostname !== location.hostname) {
+    track('outbound_click', { url: a.href, label: (a.getAttribute('aria-label') || a.textContent || '').trim().slice(0, 60) });
+  }
+});
