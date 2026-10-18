@@ -6,6 +6,10 @@
 DEPLOY.md
 README.md
 images/KakaoTalk_*.png
+images/academy_*.png
+images/academy_*.JPG
 node_modules
 package.json
 package-lock.json
+dev-proxy.js
+dev-server.js
