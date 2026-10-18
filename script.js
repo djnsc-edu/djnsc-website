@@ -232,6 +232,46 @@ document.querySelectorAll('.quick-top').forEach((btn) => {
   });
 });
 
+// ===== Quick menu: SNS group toggle =====
+// 펼침이 끝나면 overflow를 visible로 바꿔 버튼 그림자가 잘리지 않게 한다.
+const openSnsGroup = (group) => {
+  const list = group.querySelector('.quick-sns-list');
+  const toggle = group.querySelector('.quick-sns-toggle');
+  group.classList.add('is-open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'true');
+  if (list) {
+    const onEnd = (e) => {
+      if (e.propertyName !== 'max-height') return;
+      if (group.classList.contains('is-open')) list.style.overflow = 'visible';
+      list.removeEventListener('transitionend', onEnd);
+    };
+    list.addEventListener('transitionend', onEnd);
+  }
+};
+const closeSnsGroup = (group) => {
+  const list = group.querySelector('.quick-sns-list');
+  const toggle = group.querySelector('.quick-sns-toggle');
+  if (list) list.style.overflow = ''; // 접힐 땐 다시 클립(CSS의 hidden으로 복귀)
+  group.classList.remove('is-open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+};
+document.querySelectorAll('.quick-sns-toggle').forEach((btn) => {
+  const group = btn.closest('.quick-sns-group');
+  if (!group) return;
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (group.classList.contains('is-open')) closeSnsGroup(group);
+    else openSnsGroup(group);
+  });
+});
+// 바깥 클릭 시 닫기
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.quick-sns-group.is-open').forEach((group) => {
+    if (group.contains(e.target)) return;
+    closeSnsGroup(group);
+  });
+});
+
 // ===== Lenis smooth scroll =====
 let lenis = null;
 if (window.Lenis) {

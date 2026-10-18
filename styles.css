@@ -330,6 +330,7 @@ em { font-style: normal; }
 
 /* ===================== DIRECTORS ===================== */
 .directors { background: linear-gradient(150deg, var(--wine-850), var(--wine-950)); color: var(--ivory); }
+.directors .section-head.center { max-width: 1040px; }
 .directors .section-head.center .section-title { word-break: keep-all; }
 .directors-desc { margin-top: 22px; font-size: clamp(15px, 2.2vw, 17px); line-height: 1.75; color: var(--ivory); }
 
@@ -681,7 +682,22 @@ em { font-style: normal; }
 .quick-item.quick-naver { background: #03c75a; }
 .quick-item.quick-insta { background: linear-gradient(45deg, #f9ce34, #ee2a7b 55%, #6228d7); }
 .quick-item.quick-youtube { background: #ff0000; }
+.quick-item.quick-kakao { background: #fee500; color: #3c1e1e; }
 .quick-item.quick-top { background: var(--wine-800); color: var(--ivory); border: 1px solid var(--line-light); }
+
+/* SNS 묶음 토글 — 평소 접힘, 클릭 시 위로 부드럽게 펼쳐지며 위 버튼들을 밀어 올림 */
+.quick-sns-group { display: flex; flex-direction: column; align-items: center; }
+.quick-item.quick-sns-toggle { background: var(--wine-800); color: var(--ivory); border: 1px solid var(--line-light); }
+.quick-sns-toggle .quick-sns-label { font-size: 15px; font-weight: 800; letter-spacing: 0.01em; line-height: 1; }
+.quick-sns-group.is-open .quick-item.quick-sns-toggle {
+  background: linear-gradient(135deg, var(--gold), var(--gold-soft)); color: var(--wine-900); border-color: transparent;
+}
+.quick-sns-list {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  overflow: hidden; max-height: 0; opacity: 0; margin-bottom: 0; pointer-events: none;
+  transition: max-height 0.4s var(--ease), opacity 0.3s var(--ease), margin-bottom 0.4s var(--ease);
+}
+.quick-sns-group.is-open .quick-sns-list { max-height: 280px; opacity: 1; margin-bottom: 12px; pointer-events: auto; }
 
 @media (max-width: 900px) { .quick-menu { display: none; } }
 
