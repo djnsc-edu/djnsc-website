@@ -6,3 +6,6 @@
 DEPLOY.md
 README.md
 images/KakaoTalk_*.png
+node_modules
+package.json
+package-lock.json

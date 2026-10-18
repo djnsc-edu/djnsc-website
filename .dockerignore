@@ -8,3 +8,6 @@ README.md
 images/KakaoTalk_*.png
 admin
 thumbnail.html
+node_modules
+package.json
+package-lock.json
