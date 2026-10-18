@@ -3,6 +3,8 @@ FROM nginx:1.27-alpine
 
 # Cloud Run은 PORT 환경변수(기본 8080)로 요청을 전달함
 ENV PORT=8080
+# 관리자 사이드카 포트 (nginx.conf 템플릿에서 치환)
+ENV ADMIN_PORT=3000
 
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY --chown=nginx:nginx . /usr/share/nginx/html

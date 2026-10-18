@@ -10,6 +10,7 @@ env:
   REGION: asia-northeast1            # 도쿄 리전 (Cloud Run 도메인 매핑 지원 리전; Artifact Registry는 서울)
   SERVICE: djnsc-website
   REPO: djnsc-website                # Artifact Registry 저장소 이름
+  RUNTIME_SA: djnsc-admin@djnsc-website.iam.gserviceaccount.com   # 서비스 실행 계정 (GA 읽기, 관리자 비밀번호 Secret 접근)
 
 permissions:
   contents: read
@@ -38,21 +39,28 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
-      - name: Build and push image
+      - name: Build and push images (web + admin)
         run: |
-          IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:${GITHUB_SHA}"
-          docker build --build-arg ASSET_VERSION="${GITHUB_SHA::8}" -t "$IMAGE" .
-          docker push "$IMAGE"
-          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          AR="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}"
+          WEB_IMAGE="${AR}/${SERVICE}:${GITHUB_SHA}"
+          ADMIN_IMAGE="${AR}/${SERVICE}-admin:${GITHUB_SHA}"
+          docker build --build-arg ASSET_VERSION="${GITHUB_SHA::8}" -t "$WEB_IMAGE" .
+          docker build -t "$ADMIN_IMAGE" ./admin
+          docker push "$WEB_IMAGE"
+          docker push "$ADMIN_IMAGE"
+          echo "WEB_IMAGE=$WEB_IMAGE" >> "$GITHUB_ENV"
+          echo "ADMIN_IMAGE=$ADMIN_IMAGE" >> "$GITHUB_ENV"
 
+      # 한 서비스에 컨테이너 2개: web(nginx, 외부 포트 8080) + admin(Node, 127.0.0.1:3000 사이드카)
+      # 서비스 전체 옵션은 첫 --container 앞에, 컨테이너별 옵션은 각 --container 뒤에 둠
       - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: ${{ env.SERVICE }}
-          region: ${{ env.REGION }}
-          image: ${{ env.IMAGE }}
-          flags: --allow-unauthenticated --port=8080 --min-instances=0 --max-instances=3 --memory=256Mi
-
-      - name: Show URL
-        run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
+        run: |
+          gcloud run deploy "$SERVICE" --region "$REGION" --quiet \
+            --service-account "$RUNTIME_SA" \
+            --allow-unauthenticated --min-instances 0 --max-instances 3 \
+            --container web --image "$WEB_IMAGE" --port 8080 --cpu 1 --memory 256Mi \
+              --set-env-vars "ADMIN_PORT=3000" --depends-on admin \
+            --container admin --image "$ADMIN_IMAGE" --cpu 1 --memory 256Mi \
+              --set-env-vars "ADMIN_PORT=3000,NODE_ENV=production" \
+              --startup-probe "tcpSocket.port=3000,periodSeconds=1,failureThreshold=30"
+          echo "Deployed: $(gcloud run services describe "$SERVICE" --region "$REGION" --format 'value(status.url)')"

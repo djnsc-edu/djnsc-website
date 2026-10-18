@@ -1,0 +1,19 @@
+{
+  "name": "djnsc-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "도성학원 관리자 페이지 (방문 통계) - Cloud Run 사이드카",
+  "type": "commonjs",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "set MOCK_GA=1&& set ADMIN_PASSWORD=test1234&& node server.js"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.4",
+    "google-auth-library": "^9.15.1"
+  }
+}

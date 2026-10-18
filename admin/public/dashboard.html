@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>도성학원 관리자 | 방문 통계</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="/admin/static/admin.css" />
+<script src="/admin/vendor/chart.umd.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/admin/"><img src="/images/logo_WHITH_mark.png" alt="" /><b>도성학원</b><span>ADMIN</span></a>
+      <div class="spacer"></div>
+      <span class="live off" id="live"><span class="dot"></span><span id="liveText">지금 접속 확인 중…</span></span>
+      <a class="site-link" href="/" target="_blank" rel="noopener">홈페이지 열기 ↗</a>
+      <a class="btn btn-ghost btn-sm pw-link" href="/admin/password">비밀번호 변경</a>
+      <form method="post" action="/admin/logout"><button class="btn btn-ghost btn-sm" type="submit">로그아웃</button></form>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="alert alert-ok hidden" id="changedNotice">비밀번호가 변경되었습니다.</div>
+
+    <section class="setup hidden" id="setup">
+      <h2>구글 애널리틱스 연결이 필요합니다</h2>
+      <p>관리자 페이지가 통계를 읽으려면 아래 서비스 계정을 GA 속성에 <b>뷰어</b>로 한 번만 추가해 주세요.</p>
+      <ol>
+        <li><a href="https://analytics.google.com" target="_blank" rel="noopener">analytics.google.com</a> 접속 → 왼쪽 아래 <b>관리(톱니바퀴)</b></li>
+        <li>속성 열의 <b>속성 액세스 관리</b> → 오른쪽 위 <b>+</b> → <b>사용자 추가</b></li>
+        <li>이메일 주소에 <code id="saEmail">…</code> 입력, 역할 <b>뷰어</b> 선택 → 추가</li>
+        <li>이 페이지를 새로고침하면 연결됩니다 (최대 1~2분).</li>
+      </ol>
+      <p class="err" id="setupErr"></p>
+    </section>
+
+    <div class="page-head">
+      <div>
+        <h1>방문 통계</h1>
+        <p id="subtitle">djnsc.com · 데이터 불러오는 중…</p>
+      </div>
+      <div class="ranges" id="ranges">
+        <button data-range="today">오늘</button>
+        <button data-range="7d" class="active">7일</button>
+        <button data-range="28d">28일</button>
+        <button data-range="90d">90일</button>
+      </div>
+    </div>
+
+    <section class="grid kpis" id="kpis">
+      <div class="card kpi"><div class="label">방문자</div><div class="value num" data-kpi="users">–</div><div class="delta" data-delta="users"></div></div>
+      <div class="card kpi"><div class="label">방문 횟수(세션)</div><div class="value num" data-kpi="sessions">–</div><div class="delta" data-delta="sessions"></div></div>
+      <div class="card kpi"><div class="label">페이지 조회수</div><div class="value num" data-kpi="pageviews">–</div><div class="delta" data-delta="pageviews"></div></div>
+      <div class="card kpi"><div class="label">평균 체류 시간</div><div class="value num" data-kpi="avgDuration">–</div><div class="delta" data-delta="avgDuration"></div></div>
+      <div class="card kpi"><div class="label">상담예약 창 열기</div><div class="value num accent" data-kpi="reserveOpen">–</div><div class="delta" data-delta="reserveOpen"></div></div>
+      <div class="card kpi"><div class="label">상담 신청 완료</div><div class="value num accent" data-kpi="leads">–</div><div class="delta" data-delta="leads"></div></div>
+      <div class="card kpi"><div class="label">새 방문자</div><div class="value num" data-kpi="newUsers">–</div><div class="delta" data-delta="newUsers"></div></div>
+      <div class="card kpi"><div class="label">참여율</div><div class="value num" data-kpi="engagementRate">–</div><div class="delta" data-delta="engagementRate"></div></div>
+    </section>
+
+    <section class="grid two">
+      <div class="card fill">
+        <h2>방문 추이 <small id="trendHint">일별 방문자·방문 횟수</small></h2>
+        <div class="chart-box"><canvas id="trendChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>유입 채널 <small>방문 횟수 기준</small></h2>
+        <div class="chart-box short"><canvas id="channelChart"></canvas></div>
+        <div class="bars" id="channelBars" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <div class="card">
+        <h2>어디서 왔나 (유입 출처) <small>방문 횟수 기준</small></h2>
+        <div class="bars" id="sourceBars"></div>
+      </div>
+      <div class="card">
+        <h2>상담·문의 행동 <small>이전 기간 대비</small></h2>
+        <table class="tbl" id="eventTable"><thead><tr><th>행동</th><th class="r">횟수</th><th class="r">이전</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <section class="grid three">
+      <div class="card">
+        <h2>많이 본 페이지 <small>조회수</small></h2>
+        <table class="tbl" id="pageTable"><thead><tr><th>페이지</th><th class="r">조회</th><th class="r">방문자</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h2>지역 <small>방문자</small></h2>
+        <div class="bars" id="cityBars"></div>
+      </div>
+      <div class="card">
+        <h2>기기 <small>방문자</small></h2>
+        <div class="chart-box short"><canvas id="deviceChart"></canvas></div>
+        <div class="bars" id="deviceBars" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <p class="foot">
+      <span id="updatedAt"></span>
+      <span>구글 애널리틱스 데이터는 보통 24~48시간 뒤에 확정되며, 오늘·어제 수치는 바뀔 수 있습니다.</span>
+      <a href="https://analytics.google.com" target="_blank" rel="noopener">GA에서 자세히 보기 ↗</a>
+      <a href="/admin/password">비밀번호 변경</a>
+    </p>
+  </main>
+
+  <script src="/admin/static/app.js"></script>
+</body>
+</html>
