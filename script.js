@@ -491,6 +491,81 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     .finally(() => slider.setAttribute('aria-busy', 'false'));
 })();
 
+// ===== 특강 안내 이미지 팝업 (겹침형 2개) =====
+(() => {
+  const popup = document.getElementById('promoPopup');
+  if (!popup) return;
+
+  const cards = Array.from(popup.querySelectorAll('.promo-card'));
+  const keyFor = (id) => `djnsc_promo_hide_until_${id}`; // 팝업별 "오늘 하루" 저장
+
+  const isHidden = (id) => {
+    try {
+      const until = Number(localStorage.getItem(keyFor(id)) || 0);
+      return Boolean(until && Date.now() < until);
+    } catch { return false; }
+  };
+  const hideForToday = (id) => {
+    const now = new Date();
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+    try { localStorage.setItem(keyFor(id), String(end)); } catch {}
+  };
+
+  const visibleCards = () => cards.filter((c) => c.style.display !== 'none');
+
+  const closeOverlayIfEmpty = () => {
+    if (visibleCards().length) return;
+    popup.classList.remove('open');
+    popup.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+  const closeCard = (card) => {
+    card.style.display = 'none';
+    closeOverlayIfEmpty();
+  };
+
+  // 숨김 기간인 팝업은 처음부터 감춘다
+  cards.forEach((card) => { if (isHidden(card.dataset.popupId)) card.style.display = 'none'; });
+
+  cards.forEach((card) => {
+    card.querySelectorAll('[data-popup-close]').forEach((el) =>
+      el.addEventListener('click', () => closeCard(card)));
+    card.querySelectorAll('[data-popup-hide]').forEach((el) =>
+      el.addEventListener('click', () => { hideForToday(card.dataset.popupId); closeCard(card); }));
+    // 포스터 클릭 → 팝업 전체 닫고 상담예약 모달 열기
+    card.querySelectorAll('[data-popup-reserve]').forEach((el) =>
+      el.addEventListener('click', () => {
+        track('promo_reserve', { popup: card.dataset.popupId });
+        cards.forEach((c) => { c.style.display = 'none'; });
+        closeOverlayIfEmpty();
+        if (window.openReserve) window.openReserve();
+      }));
+  });
+
+  // 배경 클릭 → 맨 앞 팝업만 닫기(뒤 팝업은 남긴다)
+  popup.querySelectorAll('[data-popup-close-front]').forEach((el) =>
+    el.addEventListener('click', () => {
+      const vis = visibleCards();
+      if (vis.length) closeCard(vis[vis.length - 1]);
+    }));
+  // ESC → 맨 앞 팝업부터 하나씩 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !popup.classList.contains('open')) return;
+    const vis = visibleCards();
+    if (vis.length) closeCard(vis[vis.length - 1]);
+  });
+
+  const shouldShow = location.hash !== '#reserve' && visibleCards().length > 0;
+  if (shouldShow) {
+    setTimeout(() => {
+      popup.classList.add('open');
+      popup.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      track('promo_open');
+    }, 500);
+  }
+})();
+
 // ===== Analytics: 전화·블로그·외부 링크 클릭 추적 =====
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href]');

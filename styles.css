@@ -514,6 +514,52 @@ em { font-style: normal; }
   .reserve-dialog, .reserve-backdrop { animation: none; }
 }
 
+/* ===================== 특강 안내 이미지 팝업 (겹침형) ===================== */
+.promo-popup { position: fixed; inset: 0; z-index: 260; display: none; }
+.promo-popup.open { display: block; }
+.promo-backdrop {
+  position: fixed; inset: 0; background: rgba(20, 6, 8, 0.74);
+  backdrop-filter: blur(4px); animation: reserveFade 0.3s ease;
+}
+/* 두 팝업을 화면 중앙에 두고 살짝 어긋나게 겹친다 */
+.promo-card {
+  position: fixed; left: 50%; top: 50%;
+  width: min(84vw, 320px); max-height: 92vh;
+  display: flex; flex-direction: column;
+  background: var(--paper); border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); animation: reservePop 0.35s var(--ease);
+}
+/* 두 팝업을 정확히 같은 자리에 포갠다 (앞이 뒤를 덮음) */
+.promo-card-back  { z-index: 1; transform: translate(-50%, -50%); }
+.promo-card-front { z-index: 2; transform: translate(-50%, -50%); }
+.promo-close {
+  position: absolute; top: 12px; right: 12px; z-index: 5;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(20, 6, 8, 0.5); border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff; cursor: pointer; transition: background 0.25s;
+}
+.promo-close:hover { background: rgba(20, 6, 8, 0.8); }
+.promo-close svg { width: 18px; height: 18px; }
+.promo-poster {
+  display: block; width: 100%; min-height: 0; padding: 0; border: 0;
+  background: none; cursor: pointer; overflow: hidden;
+}
+.promo-poster img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.promo-bar { display: flex; align-items: stretch; background: var(--wine-900); flex: none; }
+.promo-bar button {
+  flex: 1; padding: 15px 10px; background: none; border: none;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: rgba(247, 245, 239, 0.82); cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.promo-bar button:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+.promo-hide { border-right: 1px solid var(--line-light); }
+.promo-close-text { color: var(--gold-soft); }
+@media (prefers-reduced-motion: reduce) {
+  .promo-card, .promo-backdrop { animation: none; }
+}
+
 /* ===================== 상담신청 완료 토스트 ===================== */
 .reserve-toast {
   position: fixed; left: 50%; top: 50%; z-index: 300;
@@ -886,6 +932,8 @@ em { font-style: normal; }
   .road { grid-template-columns: repeat(2, 1fr); gap: 32px 8px; }
   .road-step:not(:last-child)::after { display: none; }
   .director-grid { grid-template-columns: 1fr; }
+  /* 1열 가로 카드 구간: 사진이 텍스트 높이만큼 늘어나지 않도록 고정 비율로 */
+  .director-photo { align-self: flex-start; width: clamp(190px, 26vw, 230px); height: auto; aspect-ratio: 4 / 5; }
   .why-grid { grid-template-columns: repeat(2, 1fr); }
   .campus-grid { grid-template-columns: repeat(2, 1fr); }
   .campus-item { height: 240px; }
