@@ -6,7 +6,7 @@
 
 - 저장소: `djnsc-edu/djnsc-website`
 - 서비스 도메인: `https://djnsc.com`
-- 구성 파일: `Dockerfile`, `nginx.conf`, `.github/workflows/deploy.yml`
+- 구성 파일: `Dockerfile`, `nginx.conf`, `admin/Dockerfile`, `service.yaml`(Cloud Run 서비스 스펙), `.github/workflows/deploy.yml`
 
 ---
 
@@ -110,9 +110,21 @@ docker run --rm -p 8080:8080 djnsc-website
 
 ## 6. 수동 배포 (GitHub Actions 없이)
 
+서비스는 web(nginx) + admin(Node 사이드카) 2컨테이너 구성이며, 스펙은 `service.yaml`에 선언돼 있습니다.
+워크플로우와 같은 방식으로 이미지를 빌드·푸시한 뒤 플레이스홀더를 치환해 `replace` 합니다.
+
 ```bash
-gcloud run deploy djnsc-website --source . --region=$REGION --allow-unauthenticated
+AR=asia-northeast3-docker.pkg.dev/$PROJECT_ID/djnsc-website
+SHA=$(git rev-parse HEAD)
+docker build --build-arg ASSET_VERSION="${SHA:0:8}" -t "$AR/djnsc-website:$SHA" . && docker push "$AR/djnsc-website:$SHA"
+docker build -t "$AR/djnsc-website-admin:$SHA" ./admin && docker push "$AR/djnsc-website-admin:$SHA"
+sed -e "s|WEB_IMAGE_PLACEHOLDER|$AR/djnsc-website:$SHA|"     -e "s|ADMIN_IMAGE_PLACEHOLDER|$AR/djnsc-website-admin:$SHA|"     -e "s|COMMIT_SHA_PLACEHOLDER|$SHA|" service.yaml > /tmp/service.yaml
+gcloud run services replace /tmp/service.yaml --region=$REGION   # --dry-run 을 붙이면 검증만
 ```
+
+> `gcloud run deploy --container web ... --container admin ...` 방식은 쓰지 않습니다.
+> 기존 서비스의 이름 없는 컨테이너가 그대로 남아 포트를 노출하는 컨테이너가 2개가 되어
+> `Revision template should contain exactly one container with an exposed port` 오류로 실패합니다.
 
 ## 배포 후 체크리스트
 

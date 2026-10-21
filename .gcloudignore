@@ -13,3 +13,4 @@ package.json
 package-lock.json
 dev-proxy.js
 dev-server.js
+service.yaml

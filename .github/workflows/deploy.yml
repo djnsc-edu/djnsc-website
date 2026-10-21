@@ -10,7 +10,6 @@ env:
   REGION: asia-northeast1            # 도쿄 리전 (Cloud Run 도메인 매핑 지원 리전; Artifact Registry는 서울)
   SERVICE: djnsc-website
   REPO: djnsc-website                # Artifact Registry 저장소 이름
-  RUNTIME_SA: djnsc-admin@djnsc-website.iam.gserviceaccount.com   # 서비스 실행 계정 (GA 읽기, 관리자 비밀번호 Secret 접근)
 
 permissions:
   contents: read
@@ -52,15 +51,17 @@ jobs:
           echo "ADMIN_IMAGE=$ADMIN_IMAGE" >> "$GITHUB_ENV"
 
       # 한 서비스에 컨테이너 2개: web(nginx, 외부 포트 8080) + admin(Node, 127.0.0.1:3000 사이드카)
-      # 서비스 전체 옵션은 첫 --container 앞에, 컨테이너별 옵션은 각 --container 뒤에 둠
+      # service.yaml 의 플레이스홀더를 치환한 뒤 전체 스펙을 교체(replace)한다.
+      # (gcloud run deploy --container 방식은 기존의 이름 없는 컨테이너를 남겨 두어
+      #  "exactly one container with an exposed port" 오류로 실패함)
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy "$SERVICE" --region "$REGION" --quiet \
-            --service-account "$RUNTIME_SA" \
-            --allow-unauthenticated --min-instances 0 --max-instances 3 \
-            --container web --image "$WEB_IMAGE" --port 8080 --cpu 1 --memory 256Mi \
-              --set-env-vars "ADMIN_PORT=3000" --depends-on admin \
-            --container admin --image "$ADMIN_IMAGE" --cpu 1 --memory 256Mi \
-              --set-env-vars "ADMIN_PORT=3000,NODE_ENV=production" \
-              --startup-probe "tcpSocket.port=3000,periodSeconds=1,failureThreshold=30"
+          sed -e "s|WEB_IMAGE_PLACEHOLDER|${WEB_IMAGE}|" \
+              -e "s|ADMIN_IMAGE_PLACEHOLDER|${ADMIN_IMAGE}|" \
+              -e "s|COMMIT_SHA_PLACEHOLDER|${GITHUB_SHA}|" \
+              service.yaml > "${RUNNER_TEMP}/service.yaml"
+          gcloud run services replace "${RUNNER_TEMP}/service.yaml" --region "$REGION" --quiet
+          # 공개 접근 허용 (replace 는 IAM을 건드리지 않으므로 매번 보장)
+          gcloud run services add-iam-policy-binding "$SERVICE" --region "$REGION" --quiet \
+            --member allUsers --role roles/run.invoker
           echo "Deployed: $(gcloud run services describe "$SERVICE" --region "$REGION" --format 'value(status.url)')"

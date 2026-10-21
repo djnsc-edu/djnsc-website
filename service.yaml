@@ -1,0 +1,70 @@
+# Cloud Run 서비스 정의 (web nginx + admin Node 사이드카)
+# GitHub Actions(.github/workflows/deploy.yml)가 *_PLACEHOLDER 를 치환한 뒤
+# `gcloud run services replace` 로 적용한다. 전체 스펙을 선언적으로 교체하므로
+# 기존 서비스에 남아 있던 이름 없는 컨테이너가 중복 추가되는 문제가 생기지 않는다.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: djnsc-website
+  annotations:
+    run.googleapis.com/ingress: all
+  labels:
+    managed-by: github-actions
+    commit-sha: COMMIT_SHA_PLACEHOLDER
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: '0'
+        autoscaling.knative.dev/maxScale: '3'
+        run.googleapis.com/startup-cpu-boost: 'true'
+        # web(nginx)은 admin이 기동된 뒤에 시작 (nginx가 /admin 을 127.0.0.1:3000 으로 프록시)
+        run.googleapis.com/container-dependencies: '{"web":["admin"]}'
+      labels:
+        managed-by: github-actions
+        commit-sha: COMMIT_SHA_PLACEHOLDER
+    spec:
+      serviceAccountName: djnsc-admin@djnsc-website.iam.gserviceaccount.com
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+        # 인그레스 컨테이너: 포트를 노출하는 컨테이너는 반드시 하나뿐이어야 함
+        - name: web
+          image: WEB_IMAGE_PLACEHOLDER
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            - name: ADMIN_PORT
+              value: '3000'
+          resources:
+            limits:
+              cpu: '1'
+              memory: 256Mi
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            periodSeconds: 240
+            timeoutSeconds: 240
+            failureThreshold: 1
+        # 사이드카: 포트를 노출하지 않고 127.0.0.1:3000 에서만 수신
+        - name: admin
+          image: ADMIN_IMAGE_PLACEHOLDER
+          env:
+            - name: ADMIN_PORT
+              value: '3000'
+            - name: NODE_ENV
+              value: production
+          resources:
+            limits:
+              cpu: '1'
+              memory: 256Mi
+          startupProbe:
+            tcpSocket:
+              port: 3000
+            periodSeconds: 1
+            timeoutSeconds: 1
+            failureThreshold: 30
+  traffic:
+    - percent: 100
+      latestRevision: true
