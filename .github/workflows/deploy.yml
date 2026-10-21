@@ -52,7 +52,7 @@ jobs:
 
       # 한 서비스에 컨테이너 2개: web(nginx, 외부 포트 8080) + admin(Node, 127.0.0.1:3000 사이드카)
       # service.yaml 의 플레이스홀더를 치환한 뒤 전체 스펙을 교체(replace)한다.
-      # (gcloud run deploy --container 방식은 기존의 이름 없는 컨테이너를 남겨 두어
+      # (gcloud run deploy --container 방식은 이름이 다른 기존 컨테이너(djnsc-website-1)를 남겨 두어
       #  "exactly one container with an exposed port" 오류로 실패함)
       - name: Deploy to Cloud Run
         run: |

@@ -1,7 +1,7 @@
 # Cloud Run 서비스 정의 (web nginx + admin Node 사이드카)
 # GitHub Actions(.github/workflows/deploy.yml)가 *_PLACEHOLDER 를 치환한 뒤
 # `gcloud run services replace` 로 적용한다. 전체 스펙을 선언적으로 교체하므로
-# 기존 서비스에 남아 있던 이름 없는 컨테이너가 중복 추가되는 문제가 생기지 않는다.
+# 기존 서비스의 자동 이름 컨테이너(djnsc-website-1)가 남아 중복되는 문제가 생기지 않는다.
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:

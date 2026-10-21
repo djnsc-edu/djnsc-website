@@ -123,7 +123,7 @@ gcloud run services replace /tmp/service.yaml --region=$REGION   # --dry-run 을
 ```
 
 > `gcloud run deploy --container web ... --container admin ...` 방식은 쓰지 않습니다.
-> 기존 서비스의 이름 없는 컨테이너가 그대로 남아 포트를 노출하는 컨테이너가 2개가 되어
+> 단일 컨테이너 시절 자동 명명된 기존 컨테이너(`djnsc-website-1`)가 이름이 달라 그대로 남고, 포트를 노출하는 컨테이너가 2개가 되어
 > `Revision template should contain exactly one container with an exposed port` 오류로 실패합니다.
 
 ## 배포 후 체크리스트
