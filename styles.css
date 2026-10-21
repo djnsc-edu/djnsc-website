@@ -521,13 +521,30 @@ em { font-style: normal; }
   position: fixed; inset: 0; background: rgba(20, 6, 8, 0.74);
   backdrop-filter: blur(4px); animation: reserveFade 0.3s ease;
 }
-/* 두 팝업을 화면 중앙에 두고 살짝 어긋나게 겹친다 */
+/* 두 팝업을 화면 중앙에 포갠다.
+   카드 너비는 ① 화면 너비(92vw) ② 화면 높이에서 하단 바를 뺀 뒤 포스터 비율(1123:1587)로 환산한 값
+   ③ 상한(--promo-max-w) 중 가장 작은 값 → 어떤 화면에서도 포스터가 잘리지 않으면서 최대한 크게 보인다. */
 .promo-card {
+  --promo-ratio: 0.7076;          /* 포스터 가로/세로 = 1123 / 1587 */
+  --promo-bar-h: 52px;            /* 하단 버튼 바 높이 */
+  --promo-gap: 24px;              /* 화면 가장자리 여백(상하 합) */
+  --promo-max-w: 560px;
+  --promo-vh: 100vh;
   position: fixed; left: 50%; top: 50%;
-  width: min(84vw, 320px); max-height: 92vh;
+  width: max(260px, min(92vw, calc((var(--promo-vh) - var(--promo-gap) - var(--promo-bar-h)) * var(--promo-ratio)), var(--promo-max-w)));
+  max-height: calc(var(--promo-vh) - var(--promo-gap));
   display: flex; flex-direction: column;
-  background: var(--paper); border-radius: var(--radius); overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); animation: reservePop 0.35s var(--ease);
+  background: var(--paper); border-radius: var(--radius); overflow: hidden auto;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); animation: promoPop 0.35s var(--ease);
+}
+/* 중앙 정렬용 translate(-50%,-50%)를 유지한 채 떠오르는 등장 효과
+   (공용 reservePop 은 transform:none 으로 끝나 팝업이 중앙에서 벗어났다가 튀어 들어오는 문제가 있었음) */
+@keyframes promoPop {
+  0%   { opacity: 0; transform: translate(-50%, calc(-50% + 18px)) scale(0.98); }
+  100% { opacity: 1; transform: translate(-50%, -50%); }
+}
+@supports (height: 100dvh) {
+  .promo-card { --promo-vh: 100dvh; }   /* 모바일 주소창 높이 변동 대응 */
 }
 /* 두 팝업을 정확히 같은 자리에 포갠다 (앞이 뒤를 덮음) */
 .promo-card-back  { z-index: 1; transform: translate(-50%, -50%); }
@@ -542,13 +559,14 @@ em { font-style: normal; }
 .promo-close:hover { background: rgba(20, 6, 8, 0.8); }
 .promo-close svg { width: 18px; height: 18px; }
 .promo-poster {
-  display: block; width: 100%; min-height: 0; padding: 0; border: 0;
+  display: block; width: 100%; flex: none; padding: 0; border: 0;
+  aspect-ratio: 1123 / 1587;        /* 포스터 원본 비율 고정 → 카드 너비만으로 높이가 정해짐 */
   background: none; cursor: pointer; overflow: hidden;
 }
 .promo-poster img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .promo-bar { display: flex; align-items: stretch; background: var(--wine-900); flex: none; }
 .promo-bar button {
-  flex: 1; padding: 15px 10px; background: none; border: none;
+  flex: 1; height: var(--promo-bar-h); padding: 0 10px; background: none; border: none;
   font-family: inherit; font-size: 14px; font-weight: 600;
   color: rgba(247, 245, 239, 0.82); cursor: pointer;
   transition: color 0.2s, background 0.2s;
@@ -556,6 +574,21 @@ em { font-style: normal; }
 .promo-bar button:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
 .promo-hide { border-right: 1px solid var(--line-light); }
 .promo-close-text { color: var(--gold-soft); }
+/* 태블릿 이상: 포스터를 더 크게, 버튼·닫기 아이콘도 키운다 */
+@media (min-width: 768px) {
+  .promo-card { --promo-max-w: 620px; --promo-bar-h: 56px; --promo-gap: 48px; }
+  .promo-bar button { font-size: 15px; }
+  .promo-close { top: 14px; right: 14px; width: 42px; height: 42px; }
+  .promo-close svg { width: 20px; height: 20px; }
+}
+/* 대형 데스크톱 */
+@media (min-width: 1440px) {
+  .promo-card { --promo-max-w: 700px; }
+}
+/* 가로로 눕힌 폰처럼 높이가 아주 낮은 화면: 최소 너비를 지키고 카드 안에서 스크롤 */
+@media (max-height: 480px) {
+  .promo-card { --promo-gap: 16px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .promo-card, .promo-backdrop { animation: none; }
 }
