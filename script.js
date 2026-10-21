@@ -512,6 +512,19 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
   };
 
   const visibleCards = () => cards.filter((c) => c.style.display !== 'none');
+  // 포스터 크기가 서로 달라도 뒤 팝업이 비치지 않도록 맨 앞 팝업만 보이게 한다
+  const syncStack = () => {
+    const vis = visibleCards();
+    vis.forEach((c, i) => { c.style.visibility = i === vis.length - 1 ? '' : 'hidden'; });
+  };
+  // 팝업 순서 표시: 앞 팝업부터 1/N, 2/N … (숨김 처리된 팝업은 개수에서 제외)
+  const labelCards = () => {
+    const vis = visibleCards().slice().reverse(); // DOM 순서는 뒤→앞이므로 뒤집어 앞 팝업이 1번
+    vis.forEach((card, i) => {
+      const el = card.querySelector('[data-popup-count]');
+      if (el) el.textContent = `${i + 1}/${vis.length}`;
+    });
+  };
 
   const closeOverlayIfEmpty = () => {
     if (visibleCards().length) return;
@@ -521,11 +534,14 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
   };
   const closeCard = (card) => {
     card.style.display = 'none';
+    syncStack();
     closeOverlayIfEmpty();
   };
 
   // 숨김 기간인 팝업은 처음부터 감춘다
   cards.forEach((card) => { if (isHidden(card.dataset.popupId)) card.style.display = 'none'; });
+  labelCards();
+  syncStack();
 
   cards.forEach((card) => {
     card.querySelectorAll('[data-popup-close]').forEach((el) =>
