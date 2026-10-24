@@ -105,6 +105,8 @@ em { font-style: normal; }
 }
 .btn-outline:hover { border-color: var(--gold); color: var(--gold-soft); }
 .btn-block { width: 100%; }
+.btn-kakao { background: #fee500; color: #191919; }
+.btn-kakao:hover { filter: brightness(1.04); }
 
 /* ===================== HEADER ===================== */
 .site-header {
@@ -403,64 +405,6 @@ em { font-style: normal; }
 .admission-call-label { font-size: clamp(14px, 2vw, 16px); letter-spacing: 0.14em; font-weight: 600; color: var(--gold-soft); text-transform: uppercase; }
 .admission-call-num { font-size: clamp(26px, 3vw, 34px); font-weight: 800; color: var(--gold-soft); letter-spacing: 0.01em; }
 
-/* ===================== RESERVATION FORM ===================== */
-.reserve-form {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--line-light);
-  border-radius: var(--radius);
-  padding: clamp(20px, 2.6vw, 30px);
-  display: flex; flex-direction: column; gap: 14px;
-}
-.rf-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-.rf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.rf-field { display: flex; flex-direction: column; gap: 7px; }
-.rf-label { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--gold-soft); }
-.rf-label em { color: var(--gold); font-style: normal; }
-.rf-opt { color: rgba(247, 245, 239, 0.5); font-weight: 500; }
-.reserve-form input,
-.reserve-form select,
-.reserve-form textarea {
-  width: 100%; font-family: inherit; font-size: 15px; color: var(--ink);
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px;
-  padding: 12px 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.reserve-form textarea { resize: vertical; min-height: 82px; line-height: 1.6; }
-.reserve-form input::placeholder,
-.reserve-form textarea::placeholder { color: #a39599; }
-.reserve-form select {
-  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c4b52' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat; background-position: right 14px center;
-}
-.reserve-form select option { color: var(--ink); background: #ffffff; }
-.reserve-form input:focus,
-.reserve-form select:focus,
-.reserve-form textarea:focus {
-  outline: none; border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 168, 116, 0.28);
-}
-.reserve-form .btn-block { margin-top: 6px; padding: 14px 22px; font-size: 15px; }
-.reserve-form .btn[disabled] { opacity: 0.6; cursor: default; transform: none; }
-.rf-consent {
-  padding: 14px 16px; margin-top: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--line-light); border-radius: 12px;
-}
-.rf-consent-main { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-.rf-consent input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--gold); cursor: pointer; }
-.rf-consent-text { font-size: 12.5px; line-height: 1.55; color: rgba(247, 245, 239, 0.62); }
-.rf-consent-text strong { display: block; margin-bottom: 3px; font-size: 14px; font-weight: 600; color: var(--ivory); }
-.rf-consent-text em { color: var(--gold); font-style: normal; }
-.rf-consent-link {
-  display: inline-block; margin: 8px 0 0 28px;
-  font-size: 12.5px; font-weight: 600; color: var(--gold-soft);
-  text-decoration: underline; text-underline-offset: 3px;
-}
-.rf-consent-link:hover { color: var(--gold); }
-
 /* ===================== 개인정보처리방침 본문 ===================== */
 .policy { max-width: 760px; margin: 0 auto; color: var(--wine-700, #4a1220); }
 .policy h2 {
@@ -473,46 +417,10 @@ em { font-style: normal; }
 .policy li { margin-bottom: 6px; font-size: 15px; line-height: 1.7; color: #5c4b52; }
 .policy strong { color: var(--wine-900); font-weight: 700; }
 .policy-date { margin-top: 32px; padding-top: 18px; border-top: 1px solid rgba(0, 0, 0, 0.08); font-size: 14px; color: #837378; }
-.rf-note { font-size: 14px; font-weight: 600; text-align: center; }
-.rf-note:empty { display: none; }
-.rf-note.ok { color: var(--gold-soft); }
-.rf-note.error { color: #ffb3a7; }
 
-/* ===================== RESERVATION MODAL ===================== */
-.reserve-modal { position: fixed; inset: 0; z-index: 200; display: none; }
-.reserve-modal.open { display: flex; align-items: center; justify-content: center; padding: 20px; }
-.reserve-backdrop {
-  position: fixed; inset: 0; background: rgba(20, 6, 8, 0.74);
-  backdrop-filter: blur(4px); animation: reserveFade 0.3s ease;
-}
-.reserve-dialog {
-  position: relative; z-index: 1; width: 100%; max-width: 560px; max-height: 90vh;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
-  background: linear-gradient(158deg, var(--wine-900), var(--wine-800));
-  border: 1px solid var(--line-light); border-radius: var(--radius);
-  padding: clamp(24px, 3.2vw, 32px);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-  animation: reservePop 0.34s var(--ease);
-}
-.reserve-close {
-  position: absolute; top: 14px; right: 14px;
-  width: 40px; height: 40px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line-light);
-  color: var(--ivory); cursor: pointer; transition: background 0.25s, border-color 0.25s;
-}
-.reserve-close:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
-.reserve-close svg { width: 18px; height: 18px; }
-.reserve-head { margin-bottom: clamp(18px, 2.6vw, 24px); padding-right: 40px; }
-.reserve-title { font-size: clamp(24px, 3.4vw, 30px); font-weight: 800; color: var(--ivory); letter-spacing: -0.02em; margin-top: 4px; }
-.reserve-desc { margin-top: 10px; font-size: clamp(14px, 2vw, 15px); line-height: 1.6; color: rgba(247, 245, 239, 0.72); }
-/* form sits directly inside the dialog — drop its own card chrome */
-.reserve-modal .reserve-form { background: transparent; border: none; padding: 0; }
+/* 팝업 공통 애니메이션 */
 @keyframes reservePop { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes reserveFade { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
-  .reserve-dialog, .reserve-backdrop { animation: none; }
-}
 
 /* ===================== 특강 안내 이미지 팝업 (겹침형) ===================== */
 .promo-popup { position: fixed; inset: 0; z-index: 260; display: none; }
@@ -601,39 +509,6 @@ em { font-style: normal; }
 }
 @media (prefers-reduced-motion: reduce) {
   .promo-card, .promo-backdrop { animation: none; }
-}
-
-/* ===================== 상담신청 완료 토스트 ===================== */
-.reserve-toast {
-  position: fixed; left: 50%; top: 50%; z-index: 300;
-  transform: translate(-50%, -50%) scale(0.96); opacity: 0; pointer-events: none;
-  transition: transform 0.4s var(--ease), opacity 0.4s var(--ease);
-}
-.reserve-toast.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-.reserve-toast-inner {
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  gap: 8px;
-  width: min(90vw, 400px);
-  padding: 40px 36px 36px;
-  background: linear-gradient(158deg, var(--wine-900), var(--wine-800));
-  border: 1px solid var(--line-light); border-radius: 20px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-}
-.reserve-toast-icon {
-  flex: none; width: 60px; height: 60px; margin-bottom: 12px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--gold); color: var(--wine-900);
-  box-shadow: 0 0 0 8px rgba(201, 168, 116, 0.14);
-}
-.reserve-toast-icon svg { width: 30px; height: 30px; }
-.reserve-toast-title {
-  font-size: 18px; font-weight: 800; letter-spacing: -0.01em; color: var(--ivory);
-}
-.reserve-toast-sub {
-  font-size: 14px; font-weight: 500; line-height: 1.6; color: rgba(247, 245, 239, 0.7);
-}
-@media (prefers-reduced-motion: reduce) {
-  .reserve-toast { transition: opacity 0.2s linear; }
 }
 
 /* ===================== ENVIRONMENT ===================== */
@@ -749,8 +624,8 @@ em { font-style: normal; }
   color: var(--ivory); border-right: 1px solid var(--line-light);
 }
 .mcta-item:last-child { border-right: none; }
-.mcta-kakao { color: #ffe64d; }
 .mcta-primary { background: linear-gradient(135deg, var(--gold), var(--gold-soft)); color: var(--wine-900); }
+.mcta-primary.mcta-kakao { background: #fee500; color: #191919; }
 
 /* ===================== QUICK MENU ===================== */
 .quick-menu {
@@ -1030,11 +905,6 @@ em { font-style: normal; }
   .detail-quote { padding: 64px 0; }
   .cta-band { padding: 64px 0; }
   .cta-band .btn { display: block; max-width: 320px; margin: 10px auto 0; }
-}
-
-/* Reservation form: stack paired fields on narrow screens */
-@media (max-width: 520px) {
-  .rf-row { grid-template-columns: 1fr; }
 }
 
 /* Very small phones (≤380px) — fluid tokens cover most sizing; only layout tweaks remain */

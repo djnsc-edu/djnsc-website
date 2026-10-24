@@ -65,164 +65,15 @@ if (window.AOS) {
   AOS.init({ duration: 750, easing: 'ease-out-cubic', once: true, offset: 90, anchorPlacement: 'top-bottom' });
 }
 
-// ===== Reservation modal (popup) =====
-const reserveModal = document.getElementById('reserveModal');
-if (reserveModal) {
-  let lastFocused = null;
-  const openReserve = () => {
-    lastFocused = document.activeElement;
-    if (typeof mobileMenu !== 'undefined' && mobileMenu.classList.contains('open')) toggleMenu(false);
-    reserveModal.classList.add('open');
-    reserveModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    const first = reserveModal.querySelector('input:not([type="checkbox"]), select, textarea');
-    if (first) setTimeout(() => first.focus(), 60);
-  };
-  const closeReserve = () => {
-    reserveModal.classList.remove('open');
-    reserveModal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    if (lastFocused && lastFocused.focus) lastFocused.focus();
-  };
-
-  document.querySelectorAll('[data-reserve-open]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      track('reserve_open', { location: el.closest('section, header, footer')?.id || el.className || 'unknown' });
-      openReserve();
-    });
+// ===== 카카오톡 채팅상담 (채널 1:1 채팅으로 연결) =====
+const KAKAO_CONSULT_URL = 'https://pf.kakao.com/_xfETmX/chat';
+// 대시보드 연속성을 위해 기존 reserve_open 이벤트 이름을 그대로 사용
+const trackKakaoConsult = (location) => track('reserve_open', { method: 'kakao', location });
+document.querySelectorAll('[data-kakao-consult]').forEach((el) => {
+  el.addEventListener('click', () => {
+    trackKakaoConsult(el.closest('section, header, footer')?.id || el.className || 'unknown');
   });
-  reserveModal.querySelectorAll('[data-reserve-close]').forEach((el) => {
-    el.addEventListener('click', closeReserve);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && reserveModal.classList.contains('open')) closeReserve();
-  });
-
-  // Open automatically when arriving from another page with #reserve
-  if (location.hash === '#reserve') openReserve();
-  window.addEventListener('hashchange', () => { if (location.hash === '#reserve') openReserve(); });
-
-  window.openReserve = openReserve;
-  window.closeReserve = closeReserve;
-}
-
-// ===== Reservation form (Web3Forms → 연결된 이메일로 전송) =====
-const RESERVE_ACCESS_KEY = '95047e57-d2cf-4bd4-bacc-9278ae0c4880';
-const reserveForm = document.getElementById('reserveForm');
-if (reserveForm) {
-  const note = document.getElementById('reserveNote');
-  const submitBtn = document.getElementById('reserveSubmit');
-  const setNote = (msg, type) => { note.textContent = msg; note.className = 'rf-note' + (type ? ' ' + type : ''); };
-
-  // 학생 이름: 한글·영문·공백만 허용
-  const nameEl = reserveForm.elements['name'];
-  if (nameEl) {
-    nameEl.addEventListener('input', () => {
-      const cleaned = nameEl.value.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z\s]/g, '');
-      if (cleaned !== nameEl.value) nameEl.value = cleaned;
-    });
-  }
-
-  // 연락처: 숫자만 입력받아 자동 하이픈
-  const phoneEl = reserveForm.elements['phone'];
-  const formatPhone = (v) => {
-    const d = v.replace(/\D/g, '').slice(0, 11);
-    if (/^01/.test(d)) {                                  // 휴대폰(010 등) → 3-4-4
-      if (d.length <= 3) return d;
-      if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
-      return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
-    }
-    if (d.startsWith('02')) {                              // 서울 지역번호
-      if (d.length <= 2) return d;
-      if (d.length <= 6) return `${d.slice(0, 2)}-${d.slice(2)}`;
-      return `${d.slice(0, 2)}-${d.slice(2, d.length - 4)}-${d.slice(d.length - 4)}`;
-    }
-    if (d.length <= 3) return d;                           // 그 외 지역번호
-    if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
-    return `${d.slice(0, 3)}-${d.slice(3, d.length - 4)}-${d.slice(d.length - 4)}`;
-  };
-  const ageEl = reserveForm.elements['age'];
-  if (phoneEl) {
-    phoneEl.addEventListener('input', () => {
-      const atEnd = phoneEl.selectionStart === phoneEl.value.length;
-      phoneEl.value = formatPhone(phoneEl.value);
-      if (atEnd) phoneEl.setSelectionRange(phoneEl.value.length, phoneEl.value.length);
-      // 11자리(숫자 기준)가 채워지면 다음 입력칸으로 자동 이동
-      if (phoneEl.value.replace(/\D/g, '').length >= 11 && ageEl) ageEl.focus();
-    });
-  }
-
-  // 상담신청 완료 토스트
-  const toast = document.getElementById('reserveToast');
-  let toastTimer = null;
-  const showToast = () => {
-    if (!toast) return;
-    toast.classList.add('show');
-    toast.setAttribute('aria-hidden', 'false');
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      toast.classList.remove('show');
-      toast.setAttribute('aria-hidden', 'true');
-    }, 2200);
-  };
-
-  reserveForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const els = reserveForm.elements;
-    const name = els['name'].value.trim();
-    const phone = els['phone'].value.trim();
-    const achievement = els['achievement'].value.trim();
-    const preferred = els['preferred'].value.trim();
-    if (!name || !phone) {
-      setNote('학생 이름과 연락처를 입력해 주세요.', 'error');
-      return;
-    }
-    if (!achievement) {
-      setNote('성취도를 선택해 주세요.', 'error');
-      els['achievement'].focus();
-      return;
-    }
-    if (!preferred) {
-      setNote('희망 상담 시간을 입력해 주세요.', 'error');
-      els['preferred'].focus();
-      return;
-    }
-    if (!els['privacy'].checked) {
-      setNote('개인정보 수집·이용에 동의해 주세요.', 'error');
-      els['privacy'].focus();
-      return;
-    }
-
-    const fd = new FormData(reserveForm);
-    fd.append('access_key', RESERVE_ACCESS_KEY);
-    fd.append('subject', '[도성학원] 새 상담예약 접수');
-    fd.append('from_name', '도성학원 홈페이지');
-
-    const label = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = '전송 중…';
-    setNote('', '');
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.success) {
-        track('generate_lead', { method: 'reserve_form', achievement: fd.get('achievement') || '' });
-        reserveForm.reset();
-        setNote('', '');
-        if (window.closeReserve) window.closeReserve();
-        showToast();
-      } else {
-        setNote('전송에 실패했습니다. 잠시 후 다시 시도해 주세요.', 'error');
-      }
-    } catch {
-      setNote('네트워크 오류로 전송하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = label;
-    }
-  });
-}
+});
 
 // ===== Quick menu: scroll to top =====
 document.querySelectorAll('.quick-top').forEach((btn) => {
@@ -285,7 +136,6 @@ if (window.Lenis) {
 // Smooth in-page anchor navigation
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
   a.addEventListener('click', (e) => {
-    if (a.hasAttribute('data-reserve-open')) return; // handled by reservation modal
     const id = a.getAttribute('href');
     if (id.length > 1) {
       const target = document.querySelector(id);
@@ -548,13 +398,14 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
       el.addEventListener('click', () => closeCard(card)));
     card.querySelectorAll('[data-popup-hide]').forEach((el) =>
       el.addEventListener('click', () => { hideForToday(card.dataset.popupId); closeCard(card); }));
-    // 포스터 클릭 → 팝업 전체 닫고 상담예약 모달 열기
+    // 포스터 클릭 → 팝업 전체 닫고 카카오톡 채팅상담 열기
     card.querySelectorAll('[data-popup-reserve]').forEach((el) =>
       el.addEventListener('click', () => {
         track('promo_reserve', { popup: card.dataset.popupId });
+        trackKakaoConsult(`promo_${card.dataset.popupId}`);
         cards.forEach((c) => { c.style.display = 'none'; });
         closeOverlayIfEmpty();
-        if (window.openReserve) window.openReserve();
+        window.open(KAKAO_CONSULT_URL, '_blank', 'noopener');
       }));
   });
 
@@ -591,7 +442,7 @@ document.addEventListener('click', (e) => {
     track('phone_click', { number: href.slice(4) });
   } else if (a.classList.contains('blog-link')) {
     track('blog_click', { title: (a.querySelector('.blog-title')?.textContent || '').slice(0, 100), url: a.href });
-  } else if (/^https?:/.test(href) && a.hostname !== location.hostname) {
+  } else if (/^https?:/.test(href) && a.hostname !== location.hostname && !a.hasAttribute('data-kakao-consult')) {
     track('outbound_click', { url: a.href, label: (a.getAttribute('aria-label') || a.textContent || '').trim().slice(0, 60) });
   }
 });

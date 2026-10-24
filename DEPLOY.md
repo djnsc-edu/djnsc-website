@@ -135,5 +135,5 @@ gcloud run services replace /tmp/service.yaml --region=$REGION   # --dry-run 을
 ## 방문 통계 (Google Analytics 4)
 
 - 측정 ID `G-LVNRBN3290`, 전 페이지 `<head>`의 gtag 스니펫으로 수집. 대시보드: https://analytics.google.com
-- `script.js`에서 보내는 맞춤 이벤트: `reserve_open`(상담예약 창 열기), `generate_lead`(상담 신청 전송 성공), `phone_click`, `blog_click`, `outbound_click`
+- `script.js`에서 보내는 맞춤 이벤트: `reserve_open`(카카오톡 채팅상담 클릭, `method: kakao`), `promo_reserve`(특강 팝업 포스터 클릭), `phone_click`, `blog_click`, `outbound_click`
 - 개인정보처리방침(`privacy.html`) 6항에 수집 항목·거부 방법을 고지함. 측정 ID를 바꾸면 7개 HTML과 이 문서를 함께 수정.

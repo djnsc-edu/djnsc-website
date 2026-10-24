@@ -14,7 +14,7 @@ const RANGES = {
 };
 
 const EVENTS = {
-  reserve_open: '상담예약 창 열기',
+  reserve_open: '카카오톡 채팅상담 클릭',
   generate_lead: '상담 신청 완료',
   phone_click: '전화번호 터치',
   blog_click: '학원소식(블로그) 클릭',
