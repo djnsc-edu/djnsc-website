@@ -456,7 +456,7 @@ em { font-style: normal; }
 }
 /* 두 팝업을 정확히 같은 자리에 포갠다 (앞이 뒤를 덮음) */
 .promo-card-back  { z-index: 1; transform: translate(-50%, -50%); }
-.promo-card-front { z-index: 2; transform: translate(-50%, -50%); --promo-ratio: 0.8; } /* KMA 포스터 1080 / 1350 */
+.promo-card-front { z-index: 2; transform: translate(-50%, -50%); } /* 포스터 비율이 다르면 --promo-ratio 를 덮어쓴다 */
 /* 팝업 순서 표시 (1/2, 2/2) */
 .promo-count {
   position: absolute; top: 12px; left: 12px; z-index: 5;

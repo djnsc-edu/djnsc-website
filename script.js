@@ -367,12 +367,12 @@ if (window.Swiper && document.querySelector('.class-swiper')) {
     const vis = visibleCards();
     vis.forEach((c, i) => { c.style.visibility = i === vis.length - 1 ? '' : 'hidden'; });
   };
-  // 팝업 순서 표시: 앞 팝업부터 1/N, 2/N … (숨김 처리된 팝업은 개수에서 제외)
+  // 팝업 순서 표시: 앞 팝업부터 1/N, 2/N … (숨김 처리된 팝업은 개수에서 제외, 1개뿐이면 표시 안 함)
   const labelCards = () => {
     const vis = visibleCards().slice().reverse(); // DOM 순서는 뒤→앞이므로 뒤집어 앞 팝업이 1번
     vis.forEach((card, i) => {
       const el = card.querySelector('[data-popup-count]');
-      if (el) el.textContent = `${i + 1}/${vis.length}`;
+      if (el) el.textContent = vis.length > 1 ? `${i + 1}/${vis.length}` : '';
     });
   };
 
